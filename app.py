@@ -1,4 +1,7 @@
+from urllib import request
 import streamlit as st
+import requests
+import datetime
 
 '''
 # TaxiFareModel front
@@ -37,7 +40,6 @@ if url == 'https://taxifare.lewagon.ai/predict':
     st.markdown('Maybe you want to use your own API for the prediction, not the one provided by Le Wagon...')
 
 '''
-
 2. Let's build a dictionary containing the parameters for our API...
 
 3. Let's call our API using the `requests` package...
@@ -46,3 +48,22 @@ if url == 'https://taxifare.lewagon.ai/predict':
 
 ## Finally, we can display the prediction to the user
 '''
+
+min_date = datetime.datetime(1970,1,1)
+max_date = datetime.datetime(2100,1,1)
+
+date = st.date_input("Pickup date", min_value=min_date, max_value=max_date)
+time = st.time_input('Time')
+passengers = st.selectbox('Number of passengers', range(1,9,1))
+
+pickup_longitude = st.text_input("Pickup longitude", '-73')
+pickup_latitude = st.text_input("Pickup latitude", '46')
+dropoff_longitude = st.text_input("Dropoff longitude", '53')
+dropoff_latitude = st.text_input("Dropoff latitude", '32')
+
+params = {'pickup_datetime' : f'{date} {time}', 'pickup_longitude' : pickup_longitude , 'pickup_latitude' : pickup_latitude , 'dropoff_longitude' : dropoff_longitude, 'dropoff_latitude' : dropoff_latitude,'passenger_count' : passengers}
+url_ = f"{url}?pickup_datetime={params['pickup_datetime']}&pickup_longitude={params['pickup_longitude']}&pickup_latitude={params['pickup_latitude']}&dropoff_longitude={params['dropoff_longitude']}&dropoff_latitude={params['dropoff_latitude']}&passenger_count={params['passenger_count']}"
+st.write(url_)
+
+response = requests.get(url_)
+st.write(round(response.json()['fare'],2))
