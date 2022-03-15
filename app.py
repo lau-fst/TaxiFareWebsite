@@ -1,11 +1,6 @@
-from urllib import request
 import streamlit as st
 import requests
 import datetime
-
-from geopy.geocoders import Nominatim
-from geopy.extra.rate_limiter import RateLimiter
-import pandas as pd
 
 '''
 # TaxiFareModel
