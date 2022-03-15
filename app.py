@@ -3,67 +3,41 @@ import streamlit as st
 import requests
 import datetime
 
-'''
-# TaxiFareModel front
-'''
-
-st.markdown('''
-Remember that there are several ways to output content into your web page...
-
-Either as with the title by just creating a string (or an f-string). Or as with this paragraph using the `st.` functions
-''')
+from geopy.geocoders import Nominatim
+from geopy.extra.rate_limiter import RateLimiter
+import pandas as pd
 
 '''
-## Here we would like to add some controllers in order to ask the user to select the parameters of the ride
-
-1. Let's ask for:
-- date and time
-- pickup longitude
-- pickup latitude
-- dropoff longitude
-- dropoff latitude
-- passenger count
-'''
-
-'''
-## Once we have these, let's call our API in order to retrieve a prediction
-
-See ? No need to load a `model.joblib` file in this app, we do not even need to know anything about Data Science in order to retrieve a prediction...
-
-🤔 How could we call our API ? Off course... The `requests` package 💡
+# TaxiFareModel
 '''
 
 url = 'https://taxifare.lewagon.ai/predict'
 
-if url == 'https://taxifare.lewagon.ai/predict':
-
-    st.markdown('Maybe you want to use your own API for the prediction, not the one provided by Le Wagon...')
-
-'''
-2. Let's build a dictionary containing the parameters for our API...
-
-3. Let's call our API using the `requests` package...
-
-4. Let's retrieve the prediction from the **JSON** returned by the API...
-
-## Finally, we can display the prediction to the user
-'''
-
 min_date = datetime.datetime(1970,1,1)
 max_date = datetime.datetime(2100,1,1)
 
-date = st.date_input("Pickup date", min_value=min_date, max_value=max_date)
-time = st.time_input('Time')
+col1, col2 = st.columns(2)
+date = col1.date_input("Pickup date", min_value=min_date, max_value=max_date)
+time = col2.time_input('Time')
+
+col3, col4= st.columns(2)
+pickup_longitude = col3.number_input("Pickup longitude", 40.7614327)
+pickup_latitude = col4.number_input("Pickup latitude", -73.9798156)
+
+col5, col6= st.columns(2)
+dropoff_longitude = col5.number_input("Dropoff longitude", 40.6513111)
+dropoff_latitude = col6.number_input("Dropoff latitude", -73.8803331)
+
 passengers = st.selectbox('Number of passengers', range(1,9,1))
 
-pickup_longitude = st.text_input("Pickup longitude", '-73')
-pickup_latitude = st.text_input("Pickup latitude", '46')
-dropoff_longitude = st.text_input("Dropoff longitude", '53')
-dropoff_latitude = st.text_input("Dropoff latitude", '32')
+#token = 'pk.eyJ1IjoibGF1LWZzdCIsImEiOiJjbDBzN28wZWMwYWpvM2RxcGRzajNsZmxpIn0.ogWeSPmHFiTBtRznHx22xA'
+#data = pd.DataFrame({'lat' : [pickup_latitude, dropoff_latitude], 'lon' : [pickup_longitude, dropoff_longitude]})
+#st.map(data, zoom=9)
 
 params = {'pickup_datetime' : f'{date} {time}', 'pickup_longitude' : pickup_longitude , 'pickup_latitude' : pickup_latitude , 'dropoff_longitude' : dropoff_longitude, 'dropoff_latitude' : dropoff_latitude,'passenger_count' : passengers}
 url_ = f"{url}?pickup_datetime={params['pickup_datetime']}&pickup_longitude={params['pickup_longitude']}&pickup_latitude={params['pickup_latitude']}&dropoff_longitude={params['dropoff_longitude']}&dropoff_latitude={params['dropoff_latitude']}&passenger_count={params['passenger_count']}"
-st.write(url_)
 
 response = requests.get(url_)
-st.write(round(response.json()['fare'],2))
+fare = round(response.json()['fare'],2)
+
+st.markdown(f""" ### Fare Amount : {fare}""")
